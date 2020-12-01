@@ -68,6 +68,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
            curl \
            gnupg2 \
+           wget \
     && apt-get autoremove -yqq --purge \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -194,7 +195,7 @@ ENV CASS_DRIVER_BUILD_CONCURRENCY=${CASS_DRIVER_BUILD_CONCURRENCY}
 ARG AIRFLOW_VERSION
 ENV AIRFLOW_VERSION=${AIRFLOW_VERSION}
 
-ARG ADDITIONAL_PYTHON_DEPS=""
+ARG ADDITIONAL_PYTHON_DEPS="pyspark"
 ENV ADDITIONAL_PYTHON_DEPS=${ADDITIONAL_PYTHON_DEPS}
 
 ARG AIRFLOW_INSTALL_SOURCES="."
@@ -300,6 +301,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
            curl \
            gnupg2 \
+           wget \
     && apt-get autoremove -yqq --purge \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -399,7 +401,39 @@ RUN chmod a+x /entrypoint /clean-logs
 # See https://github.com/apache/airflow/issues/9248
 RUN chmod g=u /etc/passwd
 
-ENV PATH="${AIRFLOW_USER_HOME_DIR}/.local/bin:${PATH}"
+# JAVA
+RUN apt-get update \
+    && mkdir -p /usr/share/man/man1 \
+    && apt-get install -y openjdk-11-jre-headless \
+    && apt-get install -y openjdk-11-jre \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+
+
+# spark 
+ARG APACHE_MIRROR_SERVER=http://www-us.apache.org   
+ARG SPARK_VERSION=3.0.1 
+ARG HADOOP_VERSION=2.7  
+    
+RUN wget ${APACHE_MIRROR_SERVER}/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \ 
+    tar -xzf /spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \   
+    mv /spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} /spark  
+
+ENV SPARK_HOME /spark   
+ENV JAVA_HOME /usr
+
+WORKDIR $SPARK_HOME
+
+RUN wget https://repo1.maven.org/maven2/com/databricks/spark-xml_2.12/0.6.0/spark-xml_2.12-0.6.0.jar -P jars
+RUN wget https://repo1.maven.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar -P jars
+
+CMD ["bin/spark-class", "org.apache.spark.deploy.master.Master"]
+
+ENV PYTHONPATH=${SPARK_HOME}/python;${SPARK_HOME}/python/lib/py4j-0.10.9-src.zip:$PYTHONPATH
+
+ENV PATH="$JAVA_HOME/bin:$SPARK_HOME/jars:${AIRFLOW_USER_HOME_DIR}/.local/bin:${PATH}"
+
 ENV GUNICORN_CMD_ARGS="--worker-tmp-dir /dev/shm"
 
 WORKDIR ${AIRFLOW_HOME}

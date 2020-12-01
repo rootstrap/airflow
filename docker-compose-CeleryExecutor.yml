@@ -1,0 +1,78 @@
+version: "3.7"
+x-airflow-environment: &airflow-environment
+  AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+  AIRFLOW__WEBSERVER__RBAC: "True"
+  AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+  AIRFLOW__CELERY__BROKER_URL: "redis://:@redis:6379/0"
+  AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+  AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres:5432/airflow
+  AIRFLOW__CORE__FERNET_KEY: Mdko2auzd9rHBf_HEvxm2C1Lq2yS196GgwpmdWYn_-A= 
+
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_DB: airflow
+      POSTGRES_PASSWORD: airflow
+  redis:
+    image: redis:5.0.5
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - 6379:6379
+  init:
+    image: airflow-spark-rs:latest
+    environment:
+      <<: *airflow-environment
+    depends_on:
+      - redis
+      - postgres
+    entrypoint: /bin/bash
+    command: >
+      -c "airflow db init && airflow users create -r Admin -u admin -e admin@example.com -f admin -l user -p test"
+    restart: on-failure
+  webserver:
+    image: airflow-spark-rs:latest
+    ports:
+      - 8080:8080
+    environment:
+      <<: *airflow-environment
+    depends_on:
+      - init
+    volumes:
+      - ./dags:/opt/airflow/dags
+    command: "webserver"
+    restart: always
+  flower:
+    image: airflow-spark-rs:latest
+    ports:
+      - 5555
+    environment:
+      <<: *airflow-environment
+    depends_on:
+      - redis
+    command: celery flower
+    restart: always
+  scheduler:
+    image: airflow-spark-rs:latest
+    environment:
+      <<: *airflow-environment
+    depends_on:
+      - webserver
+    volumes:
+      - ./dags:/opt/airflow/dags
+    command: scheduler
+    restart: always
+  worker:
+    image: airflow-spark-rs:latest
+    environment:
+      <<: *airflow-environment
+    depends_on:
+      - scheduler
+    volumes:
+      - ./dags:/opt/airflow/dags
+    command: celery worker
+    restart: always
