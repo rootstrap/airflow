@@ -1,5 +1,6 @@
 #!/usr/local/bin/python
 
+
 import sys
 import os
 from pyspark.sql import SparkSession
@@ -15,6 +16,8 @@ from pyspark.sql.functions import regexp_replace
 
 output=sys.argv[2]
 input_file = sys.argv[1]
+script_args = sys.argv[3]
+
 temporary_directory=output + "_tmp/"
 
 if (os.path.exists(temporary_directory)):
@@ -39,14 +42,11 @@ df = spark.read.format("com.databricks.spark.xml") \
 
 df.printSchema()
 
-id = str(uuid.uuid4())
-df = df.withColumn("patient_id", lit(id))
 
-df.write.format("com.databricks.spark.csv")\
-		.option("header", "false")\
-		.option("escape", '"')\
-		.mode("overwrite")\
-		.save(temporary_directory)
+run_id = script_args
+df = df.withColumn("partition_id", lit(run_id))
+
+df.write.format("com.databricks.spark.csv").option("header", "false").option("escape", '"').mode("overwrite").save(temporary_directory)
 
 if (os.path.exists(temporary_directory + "_SUCCESS")):
 	print("Removing file " + temporary_directory + "_SUCCESS")
@@ -58,5 +58,3 @@ if (os.path.exists(temporary_directory + "_SUCCESS")):
 	else:
 		print("Renaming file from {} to {}".format(files[0], output))
 		os.rename(temporary_directory + files[0], output)
-else:
-	sys.exit("File has not been correcty processed; _SUCCESS file does not exists.")

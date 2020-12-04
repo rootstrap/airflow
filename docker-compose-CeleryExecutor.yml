@@ -24,7 +24,7 @@ services:
     ports:
       - 6379:6379
   init:
-    image: airflow-spark-rs:latest
+    image: rootstrap/airflow-spark:latest
     environment:
       <<: *airflow-environment
     depends_on:
@@ -35,7 +35,7 @@ services:
       -c "airflow db init && airflow users create -r Admin -u admin -e admin@example.com -f admin -l user -p test"
     restart: on-failure
   webserver:
-    image: airflow-spark-rs:latest
+    image: rootstrap/airflow-spark:latest
     ports:
       - 8080:8080
     environment:
@@ -47,7 +47,7 @@ services:
     command: "webserver"
     restart: always
   flower:
-    image: airflow-spark-rs:latest
+    image: rootstrap/airflow-spark:latest
     ports:
       - 5555
     environment:
@@ -57,7 +57,7 @@ services:
     command: celery flower
     restart: always
   scheduler:
-    image: airflow-spark-rs:latest
+    image: rootstrap/airflow-spark:latest
     environment:
       <<: *airflow-environment
     depends_on:
@@ -67,7 +67,7 @@ services:
     command: scheduler
     restart: always
   worker:
-    image: airflow-spark-rs:latest
+    image: rootstrap/airflow-spark:latest
     environment:
       <<: *airflow-environment
     depends_on:

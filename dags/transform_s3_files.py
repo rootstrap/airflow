@@ -6,32 +6,36 @@ from datetime import datetime, timedelta
 from airflow.operators.python_operator import PythonOperator
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.decorators import task
-from airflow.providers.amazon.aws.operators.s3_file_transform import S3FileTransformOperator
+from airflow.operators.s3_file_transform_operator import S3FileTransformOperator
 
 
 from airflow.operators.bash_operator import BashOperator
 from airflow.models import Variable
-import logging
+
 
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
     "start_date": datetime(2020, 9, 7),
-    "email": ["error_airflow@rootstrap.com"],
+    "email": ["mikaela.pisani@rootstrap.com"],
     "email_on_failure": False,
     "email_on_retry": False,
-    "retries": 5,
-    "retry_delay": timedelta(minutes=1)
+    "retries": 1,
+    "retry_delay": timedelta(minutes=5)
 }
 
-def load_files(bucket_name, s3_prefix):
-    
-    '''Returns a list of filenames in a certain s3 folder.'''
-    
+def process_file(file):
+    print('Processing file ', file)
+
+
+source_s3_path = Variable.get("raw_path")
+dest_s3_path = Variable.get("cleaned_path")
+s3_bucket = Variable.get("s3_bucket")
+
+def load_files():
     s3 = S3Hook(aws_conn_id='s3_connection')
     s3.get_conn()
-    files = s3.list_keys(bucket_name=bucket_name, prefix=s3_prefix, delimiter='/')
-    logging.info('Files:', files)
+    files = s3.list_keys(bucket_name=s3_bucket, prefix=source_s3_path + '/', delimiter='/')
     if (len(files)>1):
         files = files[1:]
     else:
@@ -39,37 +43,33 @@ def load_files(bucket_name, s3_prefix):
     files = list(map(lambda x:x.split('/')[1], files))
     return files
 
-def create_s3_file_transform_group():
-
-    '''For each file in s3 folder transform it.'''
-
-    # 1. List files in s3 folder
-    files = load_files('patients-records', 'raw-files/')
-    
-    # 2. for each file: transform to csv 
+def create_section():
+    files = load_files()
+    list_files = PythonOperator(task_id='list_files',
+                    python_callable=load_files
+        )
     process_files = [S3FileTransformOperator(
                 task_id=f'transform_s3_data-{i}',
-                source_s3_key='s3://patients-records/raw-files/' + file,
-                dest_s3_key='s3://patients-records/cleaned/' + file.split('.')[0] + '.csv', 
+                source_s3_key= 's3://' + s3_bucket +'/' + source_s3_path + '/' + file,
+                dest_s3_key= 's3://' + s3_bucket +'/' + dest_s3_path + '/' + file.split('.')[0] + "_{{ run_id }}.csv", 
                 replace=True,
                 transform_script='/opt/airflow/dags/scripts/transform.py',
+                script_args=["{{run_id}}"],
                 source_aws_conn_id='s3_connection',
                 dest_aws_conn_id='s3_connection'
             ) for file,i in zip(files,range(len(files)))
     ]
     
-    process_files
+    list_files >> process_files
 
 with DAG(dag_id="batchfiles", default_args=default_args, schedule_interval= '@once') as dag:
 
-    # dummy operator to start DAG graph 
     start = DummyOperator(task_id='start')
 
-    # Group tasks to load s3 files' data to redshift  
-    with TaskGroup("S3FileTransformGroup", tooltip="transform files in s3") as s3_file_transform_group:
-        create_s3_file_transform_group()
+    with TaskGroup("section", tooltip="Tasks for Section") as section:
+        create_section()
 
-    start  >> s3_file_transform_group 
+    start  >> section 
 
 
 
