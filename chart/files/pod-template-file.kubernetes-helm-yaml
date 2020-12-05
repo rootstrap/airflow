@@ -31,7 +31,7 @@ spec:
       {{- include "custom_airflow_environment_from" . | default "\n  []" | indent 6 }}
       env:
         - name: AIRFLOW__CORE__EXECUTOR
-          value: LocalExecutor
+          value: CeleryExecutor
 {{- include "standard_airflow_environment" . | indent 6}}
 {{- include "custom_airflow_environment" . | indent 6 }}
       image: {{ template "pod_template_image" . }}

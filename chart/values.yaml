@@ -28,10 +28,10 @@ gid: 50000
 airflowHome: "/opt/airflow"
 
 # Default airflow repository -- overrides all the specific images below
-defaultAirflowRepository: apache/airflow
+defaultAirflowRepository: rootstrap/airflow-spark
 
 # Default airflow tag to deploy
-defaultAirflowTag: 1.10.12
+defaultAirflowTag: 2.0.0.dev0
 
 
 # Select certain nodes for airflow pods.
@@ -45,7 +45,7 @@ labels: {}
 # Ingress configuration
 ingress:
   # Enable ingress resource
-  enabled: false
+  enabled: true
 
   # Configs for the Ingress of the web Service
   web:
@@ -56,14 +56,14 @@ ingress:
     path: ""
 
     # The hostname for the web Ingress
-    host: ""
+    host: airflow.rs-sandbox.net
 
     # configs for web Ingress TLS
     tls:
       # Enable TLS termination for the web Ingress
-      enabled: false
+      enabled: true
       # the name of a pre-created Secret containing a TLS private key and certificate
-      secretName: ""
+      secretName: "letsencrypt"
 
     # HTTP paths to add to the web Ingress before the default path
     precedingPaths: []
@@ -78,16 +78,15 @@ ingress:
 
     # The path for the flower Ingress
     path: ""
-
     # The hostname for the flower Ingress
-    host: ""
+    host: flower.rs-sandbox.net
 
     # configs for web Ingress TLS
     tls:
       # Enable TLS termination for the flower Ingress
-      enabled: false
+      enabled: true
       # the name of a pre-created Secret containing a TLS private key and certificate
-      secretName: ""
+      secretName: "letsencrypt"
 
     # HTTP paths to add to the flower Ingress before the default path
     precedingPaths: []
@@ -110,7 +109,7 @@ rbacEnabled: true
 
 # Airflow executor
 # Options: SequentialExecutor, LocalExecutor, CeleryExecutor, KubernetesExecutor
-executor: "KubernetesExecutor"
+executor: "CeleryExecutor"
 
 # If this is true and using LocalExecutor/SequentialExecutor/KubernetesExecutor, the scheduler's
 # service account will have access to communicate with the api-server and launch pods.
@@ -153,10 +152,17 @@ images:
     pullPolicy: IfNotPresent
 
 # Environment variables for all airflow containers
-env: []
-# - name: ""
-#   value: ""
-
+env:
+  - name: "AIRFLOW__CORE__EXECUTOR"
+    value: CeleryExecutor
+  - name: "AIRFLOW__CORE__LOGGING_LEVEL"
+    value: INFO
+  - name: "AIRFLOW__CORE__DAGS_FOLDER"
+    value: /opt/airflow/dags
+  #- name: "AIRFLOW__CORE__SQL_ALCHEMY_CONN"
+  #  value: postgresql+psycopg2://postgres:airflow@airflow-postgresql:5432/airflow
+  #- name: "AIRFLOW__CORE__FERNET_KEY"
+  #  value: Mdko2auzd9rHBf_HEvxm2C1Lq2yS196GgwpmdWYn_-A= 
 # Secrets for all airflow containers
 secret: []
 # - envName: ""
@@ -222,22 +228,22 @@ data:
 
   # Otherwise pass connection values in
   metadataConnection:
-    user: postgres
-    pass: postgres
-    host: ~
+    user: airflow
+    pass: airflow
+    host: airflow-postgres
     port: 5432
-    db: postgres
+    db: airflow
     sslmode: disable
   resultBackendConnection:
-    user: postgres
-    pass: postgres
-    host: ~
+    user: airflow
+    pass: airflow
+    host: airflow-postgres
     port: 5432
-    db: postgres
+    db: airflow
     sslmode: disable
 
 # Fernet key settings
-fernetKey: ~
+fernetKey: Mdko2auzd9rHBf_HEvxm2C1Lq2yS196GgwpmdWYn_-A= 
 fernetKeySecretName: ~
 
 
@@ -315,7 +321,7 @@ workers:
 
   persistence:
     # Enable persistent volumes
-    enabled: true
+    enabled: false
     # Volume size for worker StatefulSet
     size: 100Gi
     # If using a custom storageClass, pass name ref to all statefulSets here
@@ -465,15 +471,15 @@ flower:
   secretName: ~
 
   # Else, if username and password are set, create secret from username and password
-  username: ~
-  password: ~
+  username: admin
+  password: admin
 
   service:
     type: ClusterIP
 
 # Statsd settings
 statsd:
-  enabled: true
+  enabled: false
   # Additional network policies as needed
   extraNetworkPolicies: []
   resources: {}
@@ -622,14 +628,15 @@ limits: []
 cleanup:
   enabled: false
   # Run every 15 minutes
-  schedule: "*/15 * * * *"
+  schedule: "*/60 * * * *"
 
 # Configuration for postgresql subchart
 # Not recommended for production
 postgresql:
-  enabled: true
-  postgresqlPassword: postgres
-  postgresqlUsername: postgres
+  enabled: false
+  existingSecret: airflow-postgres
+  postgresqlPassword: airflow
+  postgresqlUsername: airflow
 
 # Config settings to go into the mounted airflow.cfg
 #
@@ -724,8 +731,8 @@ dags:
     # ssh examples ssh://git@github.com/apache/airflow.git
     # git@github.com:apache/airflow.git
     # https example: https://github.com/apache/airflow.git
-    repo: https://github.com/apache/airflow.git
-    branch: v1-10-stable
+    repo: ssh://git@github.com/rootstrap/airflow-examples.git
+    branch: dev
     rev: HEAD
     root: "/git"
     dest: "repo"
@@ -734,7 +741,7 @@ dags:
     maxFailures: 0
     # subpath within the repo where dags are located
     # should be "" if dags are at repo root
-    subPath: "tests/dags"
+    subPath: "dags"
     # if your repo needs a user name password
     # you can load them to a k8s secret like the one below
     #   ---
@@ -747,7 +754,7 @@ dags:
     #     GIT_SYNC_PASSWORD: <base64_encoded_git_password>
     # and specify the name of the secret below
     #
-    # credentialsSecret: git-credentials
+    # credentialsSecret: airflow-git-keys
     #
     #
     # If you are using an ssh clone url, you can load
@@ -761,7 +768,7 @@ dags:
     #     # key needs to be gitSshKey
     #     gitSshKey: <base64_encoded_data>
     # and specify the name of the secret below
-    # sshKeySecret: airflow-ssh-secret
+    sshKeySecret: airflow-git-keys
     #
     # If you are using an ssh private key, you can additionally
     # specify the content of your known_hosts file, example:
