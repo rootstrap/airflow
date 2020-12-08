@@ -731,7 +731,7 @@ dags:
     # ssh examples ssh://git@github.com/apache/airflow.git
     # git@github.com:apache/airflow.git
     # https example: https://github.com/apache/airflow.git
-    repo: ssh://git@github.com:22/rootstrap/airflow.git
+    repo: ssh://git@github.com/rootstrap/airflow.git
     branch: medical_records_pipeline
     rev: HEAD
     root: "/git"

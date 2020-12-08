@@ -111,7 +111,7 @@
 - name: git-sync-ssh-key
   secret:
     secretName: {{ .Values.dags.gitSync.sshKeySecret }}
-    defaultMode: 288
+    defaultMode: 288 #0400
 {{- end }}
 
 {{/*  Git sync container */}}
@@ -169,6 +169,8 @@
     {{- if .is_init }}
     - name: GIT_SYNC_ONE_TIME
       value: "true"
+    - name: GIT_SSH_KEY_SECRET_NAME"
+      value: ssh-privatekey
     {{- end }}
   volumeMounts:
   - name: dags
@@ -177,7 +179,7 @@
   - name: git-sync-ssh-key
     mountPath: /etc/git-secret/ssh
     readOnly: true
-    subPath: gitSshKey
+    subPath: ssh-privatekey
   {{- if .Values.dags.gitSync.knownHosts }}
   - name: config
     mountPath: /etc/git-secret/known_hosts
