@@ -726,22 +726,22 @@ dags:
     ## the name of an existing PVC to use
     existingClaim: ~
   gitSync:
-    enabled: false
+    enabled: true
     # git repo clone url
     # ssh examples ssh://git@github.com/apache/airflow.git
     # git@github.com:apache/airflow.git
     # https example: https://github.com/apache/airflow.git
-    repo: ssh://git@github.com/rootstrap/airflow-examples.git
-    branch: dev
+    repo: ssh://git@github.com:22/rootstrap/airflow.git
+    branch: medical_records_pipeline
     rev: HEAD
     root: "/git"
-    dest: "repo"
+    dest: ""
     depth: 1
     # the number of consecutive failures allowed before aborting
     maxFailures: 0
     # subpath within the repo where dags are located
     # should be "" if dags are at repo root
-    subPath: "dags"
+    subPath: ""
     # if your repo needs a user name password
     # you can load them to a k8s secret like the one below
     #   ---
@@ -754,7 +754,7 @@ dags:
     #     GIT_SYNC_PASSWORD: <base64_encoded_git_password>
     # and specify the name of the secret below
     #
-    # credentialsSecret: airflow-git-keys
+    #credentialsSecret: airflow-git-keys
     #
     #
     # If you are using an ssh clone url, you can load
@@ -768,7 +768,7 @@ dags:
     #     # key needs to be gitSshKey
     #     gitSshKey: <base64_encoded_data>
     # and specify the name of the secret below
-    sshKeySecret: airflow-git-keys
+    sshKeySecret: ssh-key-secret
     #
     # If you are using an ssh private key, you can additionally
     # specify the content of your known_hosts file, example:
