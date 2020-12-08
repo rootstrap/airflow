@@ -28,6 +28,8 @@ def process_file(file):
 source_s3_path = Variable.get("raw_path")
 dest_s3_path = Variable.get("cleaned_path")
 s3_bucket = Variable.get("s3_bucket")
+dags_folder = Variable.get("AIRFLOW__CORE__DAGS_FOLDER")
+
 
 def load_files():
     """ Call S3Hook to list files in bucket """
@@ -56,7 +58,7 @@ def create_section():
                 source_s3_key=  source_folder + file,
                 dest_s3_key= dest_folder + file.split('.')[0] + "_{{ run_id }}.csv",
                 replace=True,
-                transform_script='/opt/airflow/dags/scripts/transform.py',
+                transform_script=dags_folder + 'scripts/transform.py',
                 script_args=["{{run_id}}"],
                 source_aws_conn_id='s3_connection',
                 dest_aws_conn_id='s3_connection'
