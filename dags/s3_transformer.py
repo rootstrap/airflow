@@ -1,17 +1,13 @@
+"""Moves raw files to another bucket, converting them to CSV"""
+
+from datetime import datetime, timedelta
 from airflow.models.dag import DAG
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.utils.dates import days_ago
 from airflow.utils.task_group import TaskGroup
-from datetime import datetime, timedelta
 from airflow.operators.python_operator import PythonOperator
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-from airflow.decorators import task
 from airflow.operators.s3_file_transform_operator import S3FileTransformOperator
-
-
-from airflow.operators.bash_operator import BashOperator
 from airflow.models import Variable
-
 
 default_args = {
     "owner": "airflow",
@@ -25,6 +21,7 @@ default_args = {
 }
 
 def process_file(file):
+    """Callback executed for each file"""
     print('Processing file ', file)
 
 
@@ -33,10 +30,11 @@ dest_s3_path = Variable.get("cleaned_path")
 s3_bucket = Variable.get("s3_bucket")
 
 def load_files():
-    s3 = S3Hook(aws_conn_id='s3_connection')
-    s3.get_conn()
-    files = s3.list_keys(bucket_name=s3_bucket, prefix=source_s3_path + '/', delimiter='/')
-    if (len(files)>1):
+    """ Call S3Hook to list files in bucket """
+    cloud_hook = S3Hook(aws_conn_id='s3_connection')
+    cloud_hook.get_conn()
+    files = cloud_hook.list_keys(bucket_name=s3_bucket, prefix=source_s3_path + '/', delimiter='/')
+    if len(files)>1:
         files = files[1:]
     else:
         files = []
@@ -44,14 +42,19 @@ def load_files():
     return files
 
 def create_section():
+    """ Call Batch of tasks, containing multiple files """
     files = load_files()
     list_files = PythonOperator(task_id='list_files',
                     python_callable=load_files
         )
+
+    source_folder = 's3://' + s3_bucket +'/' + source_s3_path + '/'
+    dest_folder = 's3://' + s3_bucket +'/' + dest_s3_path + '/'
+
     process_files = [S3FileTransformOperator(
                 task_id=f'transform_s3_data-{i}',
-                source_s3_key= 's3://' + s3_bucket +'/' + source_s3_path + '/' + file,
-                dest_s3_key= 's3://' + s3_bucket +'/' + dest_s3_path + '/' + file.split('.')[0] + "_{{ run_id }}.csv", 
+                source_s3_key=  source_folder + file,
+                dest_s3_key= dest_folder + file.split('.')[0] + "_{{ run_id }}.csv",
                 replace=True,
                 transform_script='/opt/airflow/dags/scripts/transform.py',
                 script_args=["{{run_id}}"],
@@ -59,20 +62,14 @@ def create_section():
                 dest_aws_conn_id='s3_connection'
             ) for file,i in zip(files,range(len(files)))
     ]
-    
+
     list_files >> process_files
 
-with DAG(dag_id="batchfiles", default_args=default_args, schedule_interval= '@once') as dag:
+with DAG(dag_id="S3_initial", default_args=default_args, schedule_interval= '@once') as dag:
 
     start = DummyOperator(task_id='start')
 
     with TaskGroup("section", tooltip="Tasks for Section") as section:
         create_section()
 
-    start  >> section 
-
-
-
-
-
-
+    start  >> section

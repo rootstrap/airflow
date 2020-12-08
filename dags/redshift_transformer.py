@@ -1,15 +1,12 @@
+"""Moves CSV files from S3 Bucket to Redshift"""
+
+from datetime import datetime, timedelta
 from airflow.models.dag import DAG
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.utils.dates import days_ago
 from airflow.utils.task_group import TaskGroup
-from datetime import datetime, timedelta
 from airflow.operators.python_operator import PythonOperator
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-from airflow.decorators import task
 from airflow.providers.amazon.aws.transfers.s3_to_redshift import S3ToRedshiftOperator
-
-
-from airflow.operators.bash_operator import BashOperator
 from airflow.models import Variable
 
 
@@ -29,20 +26,23 @@ s3_bucket = Variable.get("s3_bucket")
 dest_s3_path = Variable.get("cleaned_path")
 
 def process_file(file):
+    """Callback executed for each file"""
     print('Processing file ', file)
 
 
 def load_files():
-    s3 = S3Hook(aws_conn_id='s3_connection')
-    s3.get_conn()
-    files = s3.list_keys(bucket_name=s3_bucket, prefix=dest_s3_path + '/', delimiter='/')
-    if (len(files)>1):
+    """ Call S3Hook to list files in bucket """
+    cloud_hook = S3Hook(aws_conn_id='s3_connection')
+    cloud_hook.get_conn()
+    files = cloud_hook.list_keys(bucket_name=s3_bucket, prefix=dest_s3_path + '/', delimiter='/')
+    if len(files)>1:
         files = files[1:]
     else:
         files = []
     return list(map(lambda x:x.split('/')[1], files))
 
 def create_section():
+    """ Call Batch of tasks, containing multiple files """
     files = load_files()
     list_files = PythonOperator(task_id='list_files',
                     python_callable=load_files
@@ -64,14 +64,9 @@ def create_section():
 
 with DAG(dag_id="redshift_transformer", default_args=default_args, schedule_interval= '@once') as dag:
 
-  
     start = DummyOperator(task_id='start')
 
     with TaskGroup("section", tooltip="Tasks for Section") as section:
         create_section()
 
-    start  >> section 
-
-
-
-
+    start  >> section
