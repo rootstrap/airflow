@@ -157,12 +157,8 @@ env:
     value: CeleryExecutor
   - name: "AIRFLOW__CORE__LOGGING_LEVEL"
     value: INFO
-  #- name: "AIRFLOW__CORE__DAGS_FOLDER"
-  #  value: /opt/airflow/dags
-  #- name: "AIRFLOW__CORE__SQL_ALCHEMY_CONN"
-  #  value: postgresql+psycopg2://postgres:airflow@airflow-postgresql:5432/airflow
-  #- name: "AIRFLOW__CORE__FERNET_KEY"
-  #  value: Mdko2auzd9rHBf_HEvxm2C1Lq2yS196GgwpmdWYn_-A= 
+  - name: "AIRFLOW__CORE__HOSTNAME_CALLABLE"
+    value: airflow.utils.net:get_host_ip_address
 # Secrets for all airflow containers
 secret: []
 # - envName: ""

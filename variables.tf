@@ -36,7 +36,7 @@ variable "engine_version" {
 }
 
 variable "instance_class" {
-  default     = "db.t2.small"
+  default     = "db.t3.medium"
   description = "Instance class"
 }
 

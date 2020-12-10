@@ -70,6 +70,31 @@
 	   helm upgrade airflow . --namespace airflow
 	```
 
+** Check database creation** 
+```bash
+	POSTGRES_POD=$(kubectl get pods | grep postgres | awk '{print $1}')
+	kubectl exec -ti $POSTGRES_POD -- bash 
+```
+Login into database:   
+```bash
+	psql airflow airflow
+```
+
+List databases: 
+```bash
+	\l
+```
+
+List tables: 
+```bash
+	\dt 
+```
+
+Query users table:
+```bash
+select * from ab_user;
+```
+
 **Forwarding to access the web:**    
 ```bash
 	kubectl port-forward $(kubectl get pods | awk '{print $1}' | grep 'webserver') 8080:8080
@@ -81,6 +106,11 @@
 ```
 Add the following lines for the specific user: 
 
+The new user can be logged in executing the following command: 
+```bash
+	aws eks update-kubeconfig --name mlcluster-tf-eks-cluster
+```
+
 ```bash
 - userarn: arn:aws:iam::XXXXYYYYZZZZ:user/ops-user
       username: ops-user
@@ -88,26 +118,5 @@ Add the following lines for the specific user:
         - system:masters 
 ```
 
-** Check database creation** 
-```bash
-	POSTGRES_POD=$(kubectl get pods | grep postgres | awk '{print $1}')
-	kubectl exec -ti $POSTGRES_POD -- bash 
-```
-Login into database:   
-```bash
-	psql airflow airflow
-```
-List databases: 
-```bash
-	\l
-```
-List tables: 
-```bash
-	\dt 
-```
-Query users table:
-```bash
-select * from ab_user;
-```
 
 
