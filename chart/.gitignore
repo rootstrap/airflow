@@ -1,3 +1,7 @@
+*.pem
+*.id_rsa 
+*.pub
+
 # User overrides
 config.yaml
 config.yml
