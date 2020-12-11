@@ -160,10 +160,10 @@ env:
   - name: "AIRFLOW__CORE__HOSTNAME_CALLABLE"
     value: airflow.utils.net:get_host_ip_address
   - name: "AIRFLOW__CORE__DAGS_FOLDER"
-    value: /opt/airflow/dags/airflow.git/airflow/dags/
+    value: /opt/airflow/dags/airflow.git/airflow/dags
   - name: "PYTHONPATH"
     value: /spark/python;/spark/python/lib/py4j-0.10.9-src.zip:/opt/airflow/dags/airflow.git/dags/
-    
+
 # Secrets for all airflow containers
 secret: []
 # - envName: ""

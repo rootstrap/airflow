@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 from airflow.models import Variable
+import os
 
 dag_args = {
     "owner": "airflow",
@@ -22,5 +23,5 @@ s3_conn_name = 's3_connection'
 redshift_conn_name = 'redshift_connection'
 source_folder = "s3://{}/{}/".format(s3_bucket, source_s3_path)
 dest_folder = "s3://{}/{}/".format(s3_bucket, dest_s3_path)
-dags_folder = Variable.get("AIRFLOW__CORE__DAGS_FOLDER")
-s3_transform_script = dags_folder + 'scripts/transform.py' 
+dags_folder = os.environ.get('AIRFLOW__CORE__DAGS_FOLDER')
+s3_transform_script = dags_folder + '/scripts/transform.py' 
