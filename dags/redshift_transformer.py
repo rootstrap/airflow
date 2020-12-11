@@ -4,6 +4,7 @@ from airflow.models.dag import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.utils.task_group import TaskGroup
 from airflow.models import Variable
+import sys, os
 
 AIRFLOW__CORE__DAGS_FOLDER = Variable.get("AIRFLOW__CORE__DAGS_FOLDER")
 sys.path.append(AIRFLOW__CORE__DAGS_FOLDER + 'utils/')
