@@ -13,7 +13,7 @@ variable "cluster_name" {
 }
 
 variable "cluster_desired_nodes" {
-  default = 2
+  default = 3
 }
 
 variable "cluster_max_nodes" {

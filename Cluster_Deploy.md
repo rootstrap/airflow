@@ -118,5 +118,9 @@ The new user can be logged in executing the following command:
         - system:masters 
 ```
 
-
+**Change instance type**
+1. Go to [Launch Configuration View](https://console.aws.amazon.com/ec2autoscaling/home?region=us-east-1#/lc)
+2. Select config that is being used and copy it. 
+3. Change 'Instance type'
+4. Go to [ASG](https://console.aws.amazon.com/ec2autoscaling/home?region=us-east-1#/details/mlcluster-tf-eks-cluster-asg?view=details) and edit the launch configuration to use the new one 
 
