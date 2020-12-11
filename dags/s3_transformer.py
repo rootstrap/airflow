@@ -4,6 +4,12 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.utils.task_group import TaskGroup
 from airflow.operators.s3_file_transform_operator import S3FileTransformOperator
 
+import sys, os
+from airflow.models import Variable
+
+AIRFLOW__CORE__DAGS_FOLDER = Variable.get("AIRFLOW__CORE__DAGS_FOLDER")
+sys.path.append(AIRFLOW__CORE__DAGS_FOLDER + 'utils/')
+
 from utils.general import groups, defaults
 from utils.s3 import helper as s3_helper
 
