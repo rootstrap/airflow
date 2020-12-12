@@ -10,7 +10,7 @@ from airflow.models import Variable
 
 import sys, os
 AIRFLOW__CORE__DAGS_FOLDER = Variable.get("AIRFLOW__CORE__DAGS_FOLDER")
-sys.path.insert(0,AIRFLOW__CORE__DAGS_FOLDER + 'utils')
+sys.path.insert(0,AIRFLOW__CORE__DAGS_FOLDER + '/utils')
 
 from importlib import import_module
 defaults = import_module('general.defaults')
