@@ -9,10 +9,10 @@ from datetime import datetime, timedelta
 from airflow.models import Variable
 
 import sys, os
-sys.path.insert(0, '/opt/airflow/dags/airflow.git/dags')
+sys.path.insert(0, os.environ.get('AIRFLOW__CORE__DAGS_FOLDER'))
 
-#from utils.general import groups, defaults
-#from utils.s3 import helper as s3_helper
+from utils.general import groups, defaults
+from utils.s3 import helper as s3_helper
 
 dag_args = {
     "owner": "airflow",
@@ -26,7 +26,6 @@ dag_args = {
 }
 
 def test():
-	print(os.environ.get('AIRFLOW__CORE__DAGS_FOLDER'))
 	print(sys.path)
 
 	    
