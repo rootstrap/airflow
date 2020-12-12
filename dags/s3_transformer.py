@@ -5,9 +5,8 @@ from airflow.utils.task_group import TaskGroup
 from airflow.operators.s3_file_transform_operator import S3FileTransformOperator
 
 import sys, os
-sys.path.insert(0, os.environ.get('AIRFLOW__CORE__DAGS_FOLDER'))
-sys.path.insert(0, os.environ.get('AIRFLOW__CORE__DAGS_FOLDER') + '/general')
-sys.path.insert(0, os.environ.get('AIRFLOW__CORE__DAGS_FOLDER') + '/s3')
+sys.path.insert(0, '/opt/airflow/dags/repo/dags/')
+sys.path.insert(0, os.environ.get('AIRFLOW__CORE__DAGS_FOLDER') + '/dags_utils')
 
 
 from general import groups, defaults
