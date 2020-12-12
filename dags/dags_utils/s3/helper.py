@@ -1,9 +1,9 @@
 """ Helper functions for Amazon S3 """
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
+
 import sys, os
-from airflow.models import Variable
-AIRFLOW__CORE__DAGS_FOLDER = Variable.get("AIRFLOW__CORE__DAGS_FOLDER")
-sys.path.insert(0, AIRFLOW__CORE__DAGS_FOLDER)
+sys.path.insert(0, os.environ.get('AIRFLOW__CORE__DAGS_FOLDER'))
+
 from dags_utils.general import defaults
 from airflow.operators.s3_file_transform_operator import S3FileTransformOperator
 from airflow.providers.amazon.aws.transfers.s3_to_redshift import S3ToRedshiftOperator

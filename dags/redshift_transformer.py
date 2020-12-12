@@ -6,9 +6,7 @@ from airflow.utils.task_group import TaskGroup
 from airflow.models import Variable
 
 import sys, os
-from airflow.models import Variable
-AIRFLOW__CORE__DAGS_FOLDER = Variable.get("AIRFLOW__CORE__DAGS_FOLDER")
-sys.path.insert(0, AIRFLOW__CORE__DAGS_FOLDER)
+sys.path.insert(0, os.environ.get('AIRFLOW__CORE__DAGS_FOLDER'))
 
 
 
