@@ -6,7 +6,6 @@ from airflow.operators.s3_file_transform_operator import S3FileTransformOperator
 
 import sys, os
 sys.path.insert(0, '/opt/airflow/dags/repo/dags/')
-sys.path.insert(0, os.environ.get('AIRFLOW__CORE__DAGS_FOLDER') + '/dags_utils')
 
 
 from dags_utils.general import groups, defaults
