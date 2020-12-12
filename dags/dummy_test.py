@@ -12,8 +12,11 @@ import sys, os
 AIRFLOW__CORE__DAGS_FOLDER = Variable.get("AIRFLOW__CORE__DAGS_FOLDER")
 sys.path.insert(0,AIRFLOW__CORE__DAGS_FOLDER)
 
-from utils.general import groups, defaults
-from utils.s3 import helper as s3_helper
+from importlib import import_module
+defaults = import_module('utils.general.defaults')
+s3_helper = import_module('utils.s3.helper')
+#from utils.general import groups, defaults
+#from utils.s3 import helper as s3_helper
 
 dag_args = {
     "owner": "airflow",
@@ -28,6 +31,8 @@ dag_args = {
 
 def test():
 	print(sys.path)
+	print(defaults)
+	print(s3_helper.csv_name('test.xml', '1'))
 
 	    
 
