@@ -9,8 +9,8 @@ sys.path.insert(0, '/opt/airflow/dags/repo/dags/')
 sys.path.insert(0, os.environ.get('AIRFLOW__CORE__DAGS_FOLDER') + '/dags_utils')
 
 
-from general import groups, defaults
-from s3 import helper as s3_helper
+from dags_utils.general import groups, defaults
+from dags_utils.s3 import helper as s3_helper
 
 
 def s3_files_section():
