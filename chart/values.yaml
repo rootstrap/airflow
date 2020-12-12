@@ -159,8 +159,8 @@ env:
     value: INFO
   - name: "AIRFLOW__CORE__HOSTNAME_CALLABLE"
     value: airflow.utils.net.get_host_ip_address
-  #- name: "AIRFLOW__CORE__DAGS_FOLDER"
-  #  value: /opt/airflow/dags/airflow.git/dags
+  - name: "AIRFLOW__CORE__DAGS_FOLDER"
+    value: /opt/airflow/dags/repo/dags
 
 # Secrets for all airflow containers
 secret: []
@@ -730,7 +730,7 @@ dags:
     branch: medical_records_pipeline
     rev: HEAD
     root: "/git"
-    dest: "airflow.git"
+    dest: "repo"
     depth: 1
     # the number of consecutive failures allowed before aborting
     maxFailures: 0
