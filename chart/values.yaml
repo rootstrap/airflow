@@ -161,8 +161,6 @@ env:
     value: airflow.utils.net.get_host_ip_address
   - name: "AIRFLOW__CORE__DAGS_FOLDER"
     value: /opt/airflow/dags/repo/dags/
-#  - name: "PYTHONPATH"
-#    value: "/opt/airflow/dags/repo/dags/:/spark/python;/spark/python/lib/py4j-0.10.9-src.zip:"
 
 # Secrets for all airflow containers
 secret: []
