@@ -5,6 +5,8 @@ import sys, os
 from airflow.models import Variable
 AIRFLOW__CORE__DAGS_FOLDER = Variable.get("AIRFLOW__CORE__DAGS_FOLDER")
 sys.path.insert(0, AIRFLOW__CORE__DAGS_FOLDER)
+sys.path.insert(0, AIRFLOW__CORE__DAGS_FOLDER + 'dags_utils')
+
 
 from dags_utils.general import defaults
 from airflow.operators.s3_file_transform_operator import S3FileTransformOperator
