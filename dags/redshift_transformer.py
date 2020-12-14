@@ -6,7 +6,9 @@ from airflow.utils.task_group import TaskGroup
 from airflow.models import Variable
 
 import sys, os
-sys.path.insert(0, '/opt/airflow/dags/repo/')
+from airflow.models import Variable
+sys.path.insert(0, Variable.get("REPO_PATH"))
+#sys.path.insert(0, '/opt/airflow/dags/repo/')
 
 from plugins.utils.general import groups, defaults
 from plugins.utils.s3 import helper as s3_helper

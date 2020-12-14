@@ -162,6 +162,7 @@ env:
   - name: "AIRFLOW__CORE__DAGS_FOLDER"
     value: /opt/airflow/dags/repo/dags/
 
+
 # Secrets for all airflow containers
 secret: []
 # - envName: ""
