@@ -650,14 +650,14 @@ config:
   core:
     dags_folder: '{{ include "airflow_dags" . }}'
     load_examples: 'False'
-    colored_console_log: 'False'
     executor: '{{ .Values.executor }}'
-    remote_logging: '{{- ternary "True" "False" .Values.elasticsearch.enabled }}'
   # Authentication backend used for the experimental API
   api:
     auth_backend: airflow.api.auth.backend.deny_all
   logging:
     logging_level: DEBUG
+    colored_console_log : 'True'
+    remote_logging: '{{- ternary "True" "False" .Values.elasticsearch.enabled }}'
   metrics:
     statsd_on: '{{ ternary "True" "False" .Values.statsd.enabled }}'
     statsd_port: 9125
