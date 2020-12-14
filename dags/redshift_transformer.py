@@ -7,7 +7,7 @@ from airflow.models import Variable
 
 import sys, os
 AIRFLOW__CORE__DAGS_FOLDER = Variable.get("AIRFLOW__CORE__DAGS_FOLDER")
-sys.path.append('/opt/airflow/dags/repo/dags/')
+sys.path.insert(0, '/opt/airflow/dags/repo/dags/')
 
 from dags_utils.general import groups, defaults
 from dags_utils.s3 import helper as s3_helper
