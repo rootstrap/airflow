@@ -6,7 +6,8 @@ from airflow.utils.task_group import TaskGroup
 from airflow.models import Variable
 
 import sys, os
-sys.path.insert(0, os.environ.get('AIRFLOW__CORE__DAGS_FOLDER') + 'dags_utils')
+AIRFLOW__CORE__DAGS_FOLDER = Variable.get("AIRFLOW__CORE__DAGS_FOLDER")
+sys.path.insert(0,AIRFLOW__CORE__DAGS_FOLDER)
 
 from dags_utils.general import groups, defaults
 from dags_utils.s3 import helper as s3_helper
