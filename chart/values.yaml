@@ -155,7 +155,7 @@ images:
 env:
   - name: "AIRFLOW__CORE__EXECUTOR"
     value: CeleryExecutor
-  - name: "AIRFLOW__CORE__LOGGING_LEVEL"
+  - name: "AIRFLOW__LOGGING__LOGGING_LEVEL"
     value: INFO
   - name: "AIRFLOW__CORE__HOSTNAME_CALLABLE"
     value: airflow.utils.net.get_host_ip_address
