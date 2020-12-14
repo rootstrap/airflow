@@ -6,11 +6,10 @@ from airflow.utils.task_group import TaskGroup
 from airflow.models import Variable
 
 import sys, os
-AIRFLOW__CORE__DAGS_FOLDER = Variable.get("AIRFLOW__CORE__DAGS_FOLDER")
-sys.path.insert(0, '/opt/airflow/dags/repo/dags/')
+sys.path.insert(0, '/opt/airflow/dags/repo/plugins/')
 
-from dags_utils.general import groups, defaults
-from dags_utils.s3 import helper as s3_helper
+from plugins.utils.general import groups, defaults
+from plugins.utils.s3 import helper as s3_helper
 
 def redshift_move_section():
     """ Call Batch of tasks, containing multiple files """

@@ -1,3 +1,5 @@
+#!/usr/local/bin/python
+
 """ Helper functions for Amazon S3 """
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 

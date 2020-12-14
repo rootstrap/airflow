@@ -1,3 +1,5 @@
+#!/usr/local/bin/python
+
 """General useful variables"""
 
 from datetime import datetime, timedelta
