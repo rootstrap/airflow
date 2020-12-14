@@ -3,7 +3,6 @@
 from airflow.models.dag import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.utils.task_group import TaskGroup
-from airflow.models import Variable
 
 import sys, os
 sys.path.insert(0, os.environ.get("REPO_PATH"))

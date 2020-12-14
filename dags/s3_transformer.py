@@ -5,9 +5,9 @@ from airflow.utils.task_group import TaskGroup
 from airflow.operators.s3_file_transform_operator import S3FileTransformOperator
 
 import sys, os
-sys.path.insert(0, os.environ.get('AIRFLOW__CORE__DAGS_FOLDER'))
-from dags_utils.general import groups, defaults
-from dags_utils.s3 import helper as s3_helper
+sys.path.insert(0, os.environ.get("REPO_PATH"))
+from plugins.utils.general import groups, defaults
+from plugins.utils.s3 import helper as s3_helper
 
 
 def s3_files_section():

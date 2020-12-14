@@ -4,10 +4,9 @@
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
 import sys, os
-sys.path.insert(0, os.environ.get('AIRFLOW__CORE__DAGS_FOLDER'))
+sys.path.insert(0, os.environ.get("REPO_PATH"))
 
-
-from dags_utils.general import defaults
+from plugins.utils.general import defaults
 from airflow.operators.s3_file_transform_operator import S3FileTransformOperator
 from airflow.providers.amazon.aws.transfers.s3_to_redshift import S3ToRedshiftOperator
 

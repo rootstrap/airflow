@@ -162,7 +162,7 @@ env:
   - name: "AIRFLOW__CORE__DAGS_FOLDER"
     value: /opt/airflow/dags/repo/dags/
   - name: "REPO_PATH"
-  - name: /opt/airflow/dags/repo/
+    value: /opt/airflow/dags/repo/
 
 
 # Secrets for all airflow containers
