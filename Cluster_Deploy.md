@@ -3,72 +3,77 @@
 ## Create kubernates cluster with terraform 
 
 1. Clone repository     
-	```bash
-	   git clone https://github.com/rootstrap/eks-base 
-	```
+```bash
+   git clone https://github.com/rootstrap/eks-base 
+```
+
 2. Export variables 
-	```bash
-		export AWS_PROFILE=default
-		export AWS_DEFAULT_REGION=us-east-1
-	```
+```bash
+	export AWS_PROFILE=default
+	export AWS_DEFAULT_REGION=us-east-1
+```
+
 3. Copy file variables.tf to terraform variables terraform/variables.tf 
+
 4. Create cluster    
-	```bash
-	    cd eks-base/terraform
-		terraform init
-		terraform apply
-		Fill provider.aws.region with us-east-1
-	```
+```bash
+    cd eks-base/terraform
+	terraform init
+	terraform apply
+	Fill provider.aws.region with us-east-1
+```
+
 4. Authenticate to the cluster 
-   ```bash
-   		aws eks update-kubeconfig --name mlcluster-tf-eks-cluster
-	```
+```bash
+		aws eks update-kubeconfig --name mlcluster-tf-eks-cluster
+```
+
 5. Register nodes to cluster
-	 ```bash 
-		terraform output config_map_aws_auth > config_map_aws_auth.yml
-		kubectl apply -f config_map_aws_auth.yml
-	 ```
+ ```bash 
+	terraform output config_map_aws_auth > config_map_aws_auth.yml
+	kubectl apply -f config_map_aws_auth.yml
+ ```
 6. Create ingress
-	```bash 
-		kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-0.32.0/deploy/static/provider/aws/deploy.yaml
-	```
+```bash 
+	kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-0.32.0/deploy/static/provider/aws/deploy.yaml
+```
 
 ## Install airflow in kubernetes cluster with helm 
 
 1. Move to chart directory 
    cd chart
 2. Create namespace
-   ```bash 
-   		kubectl create namespace airflow
-   	```
+```bash 
+	kubectl create namespace airflow
+```
 3. Set kubernetes namespace as default: 
-	```bash 
-		kubectl config set-context --current --namespace=airflow
-	```
+```bash 
+	kubectl config set-context --current --namespace=airflow
+```
 4. Create ssh keys and add them as deploy keys in the github repository, replace the email with the corresponding value
-   ```bash 
-   		ssh-keygen -t rsa -b 4096 -C "example@example.com"
-   	```
+```bash 
+		ssh-keygen -t rsa -b 4096 -C "example@example.com"
+```
 5. Add repo 
-   ```bash 
-   		helm repo add stable https://charts.helm.sh/stable/
-   	```
+```bash 
+	helm repo add stable https://charts.helm.sh/stable/
+```
 
 6. Create kubernetes secret for ssh keys, replacing {KEY_NAME} with the corresponding value according what has been generated in the last step.   
-   ```bash
-	   CURRENT_DIR=$(pwd)
-	   kubectl create secret generic ssh-key-secret --from-file=ssh-privatekey=$CURRENT_DIR/{KEY_NAME}.id_rsa --from-file=ssh-publickey=$CURRENT_DIR/{KEY_NAME}.id_rsa.pub
-	```
+```bash
+   CURRENT_DIR=$(pwd)
+   kubectl create secret generic ssh-key-secret --from-file=ssh-privatekey=$CURRENT_DIR/{KEY_NAME}.id_rsa --from-file=ssh-publickey=$CURRENT_DIR/{KEY_NAME}.id_rsa.pub
+```
 5. Install cluster
-   ```bash
-   		helm install airflow . --namespace airflow
-   	```
+```bash
+	helm install airflow . --namespace airflow
+```
 
 6. Update 
-   ```bash
-	   If you update the charts and need to update the cluster, execute: 
-	   helm upgrade airflow . --namespace airflow
-	```
+```bash
+   If you update the charts and need to update the cluster, execute: 
+   helm upgrade airflow . --namespace airflow
+```
 
 ** Check database creation** 
 ```bash
@@ -92,7 +97,7 @@ List tables:
 
 Query users table:
 ```bash
-select * from ab_user;
+	select * from ab_user;
 ```
 
 **Forwarding to access the web:**    
@@ -112,10 +117,10 @@ The new user can be logged in executing the following command:
 ```
 
 ```bash
-- userarn: arn:aws:iam::XXXXYYYYZZZZ:user/ops-user
-      username: ops-user
-      groups:
-        - system:masters 
+	- userarn: arn:aws:iam::XXXXYYYYZZZZ:user/ops-user
+	      username: ops-user
+	      groups:
+	        - system:masters 
 ```
 
 **Change instance type**
@@ -124,3 +129,19 @@ The new user can be logged in executing the following command:
 3. Change 'Instance type'
 4. Go to [ASG](https://console.aws.amazon.com/ec2autoscaling/home?region=us-east-1#/details/mlcluster-tf-eks-cluster-asg?view=details) and edit the launch configuration to use the new one 
 
+**Destroy cluster**
+1. Delete manually resources 
+```bash
+	 kubectl delete secret ssh-key-secret 
+```
+2. 
+```bash
+	helm uninstall aiflow --namespace airflow 
+```
+3. Terraform 
+```bash
+	terraform destroy 
+```
+
+** Ingress: TODO**
+[rootstrap/rs-root-cluster](https://github.com/rootstrap/rs-root-cluster/tree/master/k8s-deployments/production/traefik)
